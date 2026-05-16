@@ -1,12 +1,16 @@
 from langchain_ollama import ChatOllama
+from dotenv import load_dotenv
+import os
 
-
+load_dotenv()
 
 class OllamaService:
     def __init__(self, model:str = "qwen2.5:0.5b", temperature: int = 0):
+        ollama_url = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.llm = ChatOllama(
                         model= model,
                         temperature= temperature,
+                        base_url=ollama_url
                     )
 
     def generate_response(self, query: str) -> str:
