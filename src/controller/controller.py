@@ -20,7 +20,7 @@ ollama_service = OllamaService()
 qdrant_host = os.getenv("QDRANT_HOST", "http://localhost:6333")
 
 
-@app.post("/extract-pdf")
+@app.post("/ingest")
 async def upload_file(file: UploadFile = File(...)):
 
     # validate pdf file
@@ -58,7 +58,7 @@ async def upload_file(file: UploadFile = File(...)):
             detail=f"An error occurred while processing the PDF file: {str(e)}"
         )
 
-@app.post("/search")
+@app.post("/chat")
 async def search(request: SearchRequest):
     query_embedding, _ = embedding.get_embedding(request.query)
     qdrant = QdrantSetup(collection_name="pdf_embeddings_text", vector_size=query_embedding.shape[1], url=qdrant_host)
@@ -72,6 +72,9 @@ async def search(request: SearchRequest):
     response = ollama_service.generate_response(prompt)
     return {"response": response, "query": request.query, "results": search_results}
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "message": "Application is running"}
 
 if __name__ == "__main__":
     uvicorn.run(
